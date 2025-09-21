@@ -90,4 +90,33 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  
+  /* Calendar navigation chevrons dark mode fix */
+  .dark [data-testid="previous-month"] svg,
+  .dark [data-testid="next-month"] svg,
+  .dark .rdp-nav_button svg,
+  .dark .rdp-button_next svg,
+  .dark .rdp-button_previous svg,
+  .dark .rdp-nav svg,
+  .dark .rdp-nav button svg {
+    color: hsl(0 0% 98%) !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+  
+  .dark .rdp-nav_button:hover svg,
+  .dark .rdp-nav button:hover svg {
+    color: hsl(270 85% 75%) !important;
+  }
+  
+  /* Additional targeting for lucide icons in calendar */
+  .dark [data-radix-popper-content-wrapper] svg,
+  .dark .rdp svg[class*="lucide"] {
+    color: hsl(0 0% 98%) !important;
+    stroke: currentColor !important;
+  }
+  
+  .dark .rdp button:hover svg[class*="lucide"] {
+    color: hsl(270 85% 75%) !important;
+  }
 }
