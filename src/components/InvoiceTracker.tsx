@@ -194,7 +194,17 @@ export function InvoiceTracker() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-4xl relative">
+      {/* Saving Indicator Overlay */}
+      {isSaving && (
+        <div className="absolute top-4 right-4 z-50 bg-background/90 backdrop-blur-sm border rounded-md px-3 py-1.5 shadow-sm">
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <span className="animate-spin">💾</span>
+            Saving...
+          </p>
+        </div>
+      )}
+      
       <div className="text-center mb-8">
         {/* App Icon */}
         <div className="mb-4">
@@ -204,11 +214,6 @@ export function InvoiceTracker() {
         <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
           Track your purchases and expenses. All data is stored privately in your browser's local storage.
         </p>
-        {isSaving && (
-          <p className="text-sm text-muted-foreground mt-2">
-            💾 Saving...
-          </p>
-        )}
       </div>
       
       <div className="bg-card rounded-lg border shadow-sm">
