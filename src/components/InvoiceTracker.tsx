@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Calendar as CalendarIcon } from 'lucide-react'
+import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import {
   Table,
   TableBody,
@@ -15,6 +23,8 @@ interface InvoiceItem {
   id: number
   retailStore: string
   price: number
+  description: string
+  date: string // ISO date string
 }
 
 const STORAGE_KEY = 'invoices-and-receipts-items'
@@ -60,6 +70,19 @@ const formatCurrency = (amount: number): string => {
   }).format(amount)
 }
 
+// Safe date formatting utility
+const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) {
+      return 'Invalid date'
+    }
+    return format(date, 'MMM dd, yyyy')
+  } catch (error) {
+    return 'Invalid date'
+  }
+}
+
 // Helper functions for localStorage
 const saveItemsToStorage = (items: InvoiceItem[]) => {
   try {
@@ -81,18 +104,26 @@ const loadItemsFromStorage = (): InvoiceItem[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
-      return JSON.parse(stored)
+      const parsedItems = JSON.parse(stored)
+      // Migrate old data format to new format with description and date fields
+      return parsedItems.map((item: any) => ({
+        id: item.id,
+        retailStore: item.retailStore,
+        price: item.price,
+        description: item.description || 'No description',
+        date: item.date || new Date().toISOString()
+      }))
     }
   } catch (error) {
     console.error('Failed to load items from localStorage:', error)
   }
   // Return default data if localStorage is empty or fails
   return [
-    { id: 1, retailStore: 'MediaMarkt', price: 42.50 },
-    { id: 2, retailStore: 'Carrefour', price: 28.90 },
-    { id: 3, retailStore: 'Amazon', price: 35.75 },
-    { id: 4, retailStore: 'IKEA', price: 67.00 },
-    { id: 5, retailStore: 'Saturn', price: 159.99 },
+    { id: 1, retailStore: 'MediaMarkt', price: 42.50, description: 'Bluetooth headphones', date: new Date('2024-01-15').toISOString() },
+    { id: 2, retailStore: 'Carrefour', price: 28.90, description: 'Weekly groceries', date: new Date('2024-01-18').toISOString() },
+    { id: 3, retailStore: 'Amazon', price: 35.75, description: 'USB-C cable and adapter', date: new Date('2024-01-20').toISOString() },
+    { id: 4, retailStore: 'IKEA', price: 67.00, description: 'Desk organizer set', date: new Date('2024-01-22').toISOString() },
+    { id: 5, retailStore: 'Saturn', price: 159.99, description: 'Wireless mouse and keyboard', date: new Date('2024-01-25').toISOString() },
   ]
 }
 
@@ -104,6 +135,8 @@ export function InvoiceTracker() {
 
   const [newStore, setNewStore] = useState('')
   const [newPrice, setNewPrice] = useState('')
+  const [newDescription, setNewDescription] = useState('')
+  const [newDate, setNewDate] = useState<Date | undefined>(new Date())
   const [isSaving, setIsSaving] = useState(false)
 
   // Save items to localStorage whenever items change
@@ -120,7 +153,7 @@ export function InvoiceTracker() {
   }, [items])
 
   const addItem = () => {
-    if (newStore.trim() && newPrice.trim()) {
+    if (newStore.trim() && newPrice.trim() && newDescription.trim() && newDate) {
       const price = parseFloat(newPrice)
       if (!isNaN(price)) {
         // Get next available ID (handle case where items array is empty)
@@ -128,11 +161,15 @@ export function InvoiceTracker() {
         const newItem: InvoiceItem = {
           id: nextId,
           retailStore: newStore.trim(),
-          price: price
+          price: price,
+          description: newDescription.trim(),
+          date: newDate.toISOString()
         }
         setItems([...items, newItem])
         setNewStore('')
         setNewPrice('')
+        setNewDescription('')
+        setNewDate(new Date())
       }
     }
   }
@@ -157,7 +194,7 @@ export function InvoiceTracker() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-2xl">
+    <div className="container mx-auto p-6 max-w-4xl">
       <div className="text-center mb-8">
         {/* App Icon */}
         <div className="mb-4">
@@ -178,8 +215,10 @@ export function InvoiceTracker() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50%]">Store/Vendor</TableHead>
-              <TableHead className="w-[30%]">Amount</TableHead>
+              <TableHead className="w-[20%]">Store/Vendor</TableHead>
+              <TableHead className="w-[30%]">Description</TableHead>
+              <TableHead className="w-[15%]">Date</TableHead>
+              <TableHead className="w-[15%]">Amount</TableHead>
               <TableHead className="w-[20%] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -187,6 +226,8 @@ export function InvoiceTracker() {
             {items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.retailStore}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{item.description}</TableCell>
+                <TableCell className="text-sm">{formatDate(item.date)}</TableCell>
                 <TableCell>{formatCurrency(item.price)}</TableCell>
                 <TableCell className="text-right">
                   <Button
@@ -220,27 +261,71 @@ export function InvoiceTracker() {
             <span className="text-lg font-bold">{formatCurrency(totalSpent)}</span>
           </div>
           
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter store or vendor name"
-              value={newStore}
-              onChange={(e) => setNewStore(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-1"
-            />
-            <Input
-              placeholder="Enter amount"
-              type="number"
-              step="0.01"
-              min="0"
-              value={newPrice}
-              onChange={(e) => setNewPrice(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="w-32"
-            />
-            <Button onClick={addItem} disabled={!newStore.trim() || !newPrice.trim()}>
-              Add Item
-            </Button>
+          <div className="space-y-3">
+            {/* First row: Store and Amount */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter store or vendor name"
+                value={newStore}
+                onChange={(e) => setNewStore(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="flex-1"
+              />
+              <Input
+                placeholder="Enter amount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="w-32"
+              />
+            </div>
+            
+            {/* Second row: Description */}
+            <div>
+              <Textarea
+                placeholder="Enter description (e.g., Bluetooth headphones, Weekly groceries)..." 
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                className="min-h-[60px] resize-none"
+              />
+            </div>
+            
+            {/* Third row: Date picker and Add button */}
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`w-full justify-start text-left font-normal ${
+                        !newDate && "text-muted-foreground"
+                      }`}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newDate ? format(newDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={newDate}
+                      onSelect={setNewDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <Button 
+                onClick={addItem} 
+                disabled={!newStore.trim() || !newPrice.trim() || !newDescription.trim() || !newDate}
+                className="px-8"
+              >
+                Add Item
+              </Button>
+            </div>
           </div>
         </div>
       </div>

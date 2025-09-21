@@ -8,6 +8,8 @@ A privacy-first expense tracking app. All data stays in your browser - no server
 
 - **🔒 Complete Privacy**: 100% local storage, works offline, no data transmission
 - **💰 Euro Currency**: Proper European formatting (€42,50) with real-time totals
+- **📝 Rich Data**: Store name, description, date, and amount for each entry
+- **📅 Date Picker**: Interactive calendar for selecting purchase dates
 - **🎨 Modern UI**: Responsive design with custom icons and smooth animations
 - **⚡ Instant UX**: Auto-save, keyboard shortcuts, input validation, bulk operations
 
@@ -33,6 +35,8 @@ interface InvoiceItem {
   id: number
   retailStore: string  // Store or vendor name
   price: number       // Amount in euros
+  description: string // Item description
+  date: string       // ISO date string
 }
 ```
 
