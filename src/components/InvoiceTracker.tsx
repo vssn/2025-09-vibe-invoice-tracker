@@ -78,7 +78,7 @@ const formatDate = (dateString: string): string => {
     if (isNaN(date.getTime())) {
       return 'Invalid date'
     }
-    return format(date, 'MMM dd, yyyy')
+    return format(date, 'dd. MMM yyyy')
   } catch (error) {
     return 'Invalid date'
   }
@@ -397,7 +397,7 @@ export function InvoiceTracker() {
                     }`}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {newDate ? format(newDate, "PPP") : <span>Pick a date</span>}
+                    {newDate ? format(newDate, "dd. MMM yyyy") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
