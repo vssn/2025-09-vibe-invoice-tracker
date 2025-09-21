@@ -4,25 +4,28 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Light pastel violet-blue background */
+    --background: 260 100% 98.5%;
     --foreground: 222.2 84% 4.9%;
+    /* Cards remain white */
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary violet-blue gradient colors */
+    --primary: 260 85% 60%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
+    --muted: 260 40% 95%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
+    --accent: 260 40% 95%;
     --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 260 30% 90%;
+    --input: 260 30% 90%;
+    --ring: 260 85% 60%;
     --radius: 0.5rem;
   }
 
@@ -55,5 +58,22 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .gradient-violet-blue {
+    background: linear-gradient(135deg, hsl(270 85% 60%) 0%, hsl(240 85% 65%) 100%);
+  }
+  
+  .gradient-violet-blue-light {
+    background: linear-gradient(135deg, hsl(270 60% 95%) 0%, hsl(240 60% 96%) 100%);
+  }
+  
+  .text-gradient-violet-blue {
+    background: linear-gradient(135deg, hsl(270 85% 60%) 0%, hsl(240 85% 65%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
