@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Trash2, Calendar as CalendarIcon } from 'lucide-react'
+import { Trash2, Calendar as CalendarIcon, Share, Copy, Check } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,6 +28,7 @@ interface InvoiceItem {
 }
 
 const STORAGE_KEY = 'invoices-and-receipts-items'
+const URL_DATA_PARAM = 'data'
 
 // App Icon Component
 const AppIcon = () => (
@@ -100,7 +101,48 @@ const clearItemsFromStorage = () => {
   }
 }
 
+// Load data from URL parameter if present
+const loadItemsFromUrlParam = (): InvoiceItem[] | null => {
+  try {
+    const urlParams = new URLSearchParams(window.location.search)
+    const encodedData = urlParams.get(URL_DATA_PARAM)
+    
+    if (encodedData) {
+      // Decode base64 data
+      const decodedData = atob(encodedData)
+      const parsedItems = JSON.parse(decodedData)
+      
+      // Validate the data structure
+      if (Array.isArray(parsedItems)) {
+        return parsedItems.map((item: any) => ({
+          id: item.id || 1,
+          retailStore: item.retailStore || 'Unknown Store',
+          price: Number(item.price) || 0,
+          description: item.description || 'No description',
+          date: item.date || new Date().toISOString()
+        }))
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load data from URL parameter:', error)
+  }
+  return null
+}
+
 const loadItemsFromStorage = (): InvoiceItem[] => {
+  // First, try to load from URL parameter
+  const urlData = loadItemsFromUrlParam()
+  if (urlData && urlData.length > 0) {
+    // Save URL data to localStorage and clean up the URL
+    saveItemsToStorage(urlData)
+    // Remove the data parameter from URL without page reload
+    const url = new URL(window.location.href)
+    url.searchParams.delete(URL_DATA_PARAM)
+    window.history.replaceState({}, document.title, url.toString())
+    return urlData
+  }
+
+  // If no URL data, load from localStorage
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
@@ -127,6 +169,19 @@ const loadItemsFromStorage = (): InvoiceItem[] => {
   ]
 }
 
+// Generate a shareable link with invoice data encoded as base64
+const generateShareLink = (items: InvoiceItem[]): string => {
+  try {
+    const jsonData = JSON.stringify(items)
+    const encodedData = btoa(jsonData)
+    const baseUrl = window.location.origin + window.location.pathname
+    return `${baseUrl}?${URL_DATA_PARAM}=${encodedData}`
+  } catch (error) {
+    console.error('Failed to generate share link:', error)
+    throw error
+  }
+}
+
 export function InvoiceTracker() {
   const [items, setItems] = useState<InvoiceItem[]>(() => {
     // Load items from localStorage on initial render
@@ -138,6 +193,8 @@ export function InvoiceTracker() {
   const [newDescription, setNewDescription] = useState('')
   const [newDate, setNewDate] = useState<Date | undefined>(new Date())
   const [isSaving, setIsSaving] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
+  const [shareSuccess, setShareSuccess] = useState(false)
 
   // Save items to localStorage whenever items change
   useEffect(() => {
@@ -193,6 +250,48 @@ export function InvoiceTracker() {
     }
   }
 
+  const handleShareLink = async () => {
+    if (items.length === 0) {
+      return // Don't allow sharing if no items
+    }
+
+    setIsSharing(true)
+    setShareSuccess(false)
+
+    try {
+      const shareLink = generateShareLink(items)
+      
+      // Try to use the modern Clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareLink)
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea')
+        textArea.value = shareLink
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-9999px'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+      }
+      
+      setShareSuccess(true)
+      
+      // Reset success state after 3 seconds
+      setTimeout(() => {
+        setShareSuccess(false)
+      }, 3000)
+      
+    } catch (error) {
+      console.error('Failed to copy share link:', error)
+      // You could add error state here if needed
+    } finally {
+      setIsSharing(false)
+    }
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-4xl relative">
       {/* Saving Indicator Overlay */}
@@ -215,7 +314,114 @@ export function InvoiceTracker() {
           Track your purchases and expenses. All data is stored privately in your browser's local storage.
         </p>
       </div>
+
+      {/* Actions Card */}
+      <div className="bg-card rounded-lg border shadow-sm p-4 mb-6">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <span className="text-lg font-semibold">Total Amount: {formatCurrency(totalSpent)}</span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShareLink}
+              disabled={items.length === 0 || isSharing}
+              className="flex items-center gap-1"
+            >
+              {shareSuccess ? (
+                <><Check className="h-3 w-3" /> Copied!</>
+              ) : isSharing ? (
+                <><Copy className="h-3 w-3 animate-pulse" /> Copying...</>
+              ) : (
+                <><Share className="h-3 w-3" /> Share Link</>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearAllItems}
+              disabled={items.length === 0}
+              className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
+              Clear All
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Item Form Card */}
+      <div className="bg-card rounded-lg border shadow-sm p-4 mb-6">
+        <h2 className="text-lg font-semibold mb-4">Add New Item</h2>
+        <div className="space-y-3">
+          {/* First row: Store and Amount */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter store or vendor name"
+              value={newStore}
+              onChange={(e) => setNewStore(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="flex-1"
+            />
+            <Input
+              placeholder="Enter amount"
+              type="number"
+              step="0.01"
+              min="0"
+              value={newPrice}
+              onChange={(e) => setNewPrice(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="w-32"
+            />
+          </div>
+          
+          {/* Second row: Description */}
+          <div>
+            <Textarea
+              placeholder="Enter description (e.g., Bluetooth headphones, Weekly groceries)..." 
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              className="min-h-[60px] resize-none"
+            />
+          </div>
+          
+          {/* Third row: Date picker and Add button */}
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={`w-full justify-start text-left font-normal ${
+                      !newDate && "text-muted-foreground"
+                    }`}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {newDate ? format(newDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={newDate}
+                    onSelect={setNewDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <Button 
+              onClick={addItem} 
+              disabled={!newStore.trim() || !newPrice.trim() || !newDescription.trim() || !newDate}
+              className="px-8"
+            >
+              Add Item
+            </Button>
+          </div>
+        </div>
+      </div>
       
+      {/* Items Table Card */}
       <div className="bg-card rounded-lg border shadow-sm">
         <Table>
           <TableHeader>
@@ -248,91 +454,6 @@ export function InvoiceTracker() {
             ))}
           </TableBody>
         </Table>
-        
-        <div className="p-4 border-t bg-muted/50">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-lg font-semibold">Total Amount:</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearAllItems}
-                disabled={items.length === 0}
-                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
-              >
-                Clear All
-              </Button>
-            </div>
-            <span className="text-lg font-bold">{formatCurrency(totalSpent)}</span>
-          </div>
-          
-          <div className="space-y-3">
-            {/* First row: Store and Amount */}
-            <div className="flex gap-2">
-              <Input
-                placeholder="Enter store or vendor name"
-                value={newStore}
-                onChange={(e) => setNewStore(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="flex-1"
-              />
-              <Input
-                placeholder="Enter amount"
-                type="number"
-                step="0.01"
-                min="0"
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="w-32"
-              />
-            </div>
-            
-            {/* Second row: Description */}
-            <div>
-              <Textarea
-                placeholder="Enter description (e.g., Bluetooth headphones, Weekly groceries)..." 
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                className="min-h-[60px] resize-none"
-              />
-            </div>
-            
-            {/* Third row: Date picker and Add button */}
-            <div className="flex gap-2 items-end">
-              <div className="flex-1">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={`w-full justify-start text-left font-normal ${
-                        !newDate && "text-muted-foreground"
-                      }`}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {newDate ? format(newDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={newDate}
-                      onSelect={setNewDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <Button 
-                onClick={addItem} 
-                disabled={!newStore.trim() || !newPrice.trim() || !newDescription.trim() || !newDate}
-                className="px-8"
-              >
-                Add Item
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
