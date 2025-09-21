@@ -1,0 +1,212 @@
+import React, { useState, useEffect } from 'react'
+import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
+interface InvoiceItem {
+  id: number
+  retailStore: string
+  price: number
+}
+
+const STORAGE_KEY = 'invoices-and-receipts-items'
+
+// Currency formatting utility
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR'
+  }).format(amount)
+}
+
+// Helper functions for localStorage
+const saveItemsToStorage = (items: InvoiceItem[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  } catch (error) {
+    console.error('Failed to save items to localStorage:', error)
+  }
+}
+
+const clearItemsFromStorage = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch (error) {
+    console.error('Failed to clear items from localStorage:', error)
+  }
+}
+
+const loadItemsFromStorage = (): InvoiceItem[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (error) {
+    console.error('Failed to load items from localStorage:', error)
+  }
+  // Return default data if localStorage is empty or fails
+  return [
+    { id: 1, retailStore: 'MediaMarkt', price: 42.50 },
+    { id: 2, retailStore: 'Carrefour', price: 28.90 },
+    { id: 3, retailStore: 'Amazon', price: 35.75 },
+    { id: 4, retailStore: 'IKEA', price: 67.00 },
+    { id: 5, retailStore: 'Saturn', price: 159.99 },
+  ]
+}
+
+export function InvoiceTracker() {
+  const [items, setItems] = useState<InvoiceItem[]>(() => {
+    // Load items from localStorage on initial render
+    return loadItemsFromStorage()
+  })
+
+  const [newStore, setNewStore] = useState('')
+  const [newPrice, setNewPrice] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Save items to localStorage whenever items change
+  useEffect(() => {
+    const saveData = async () => {
+      setIsSaving(true)
+      saveItemsToStorage(items)
+      // Small delay to show the saving indicator
+      setTimeout(() => setIsSaving(false), 300)
+    }
+    
+    // Save data on any change
+    saveData()
+  }, [items])
+
+  const addItem = () => {
+    if (newStore.trim() && newPrice.trim()) {
+      const price = parseFloat(newPrice)
+      if (!isNaN(price)) {
+        // Get next available ID (handle case where items array is empty)
+        const nextId = items.length > 0 ? Math.max(...items.map(item => item.id)) + 1 : 1
+        const newItem: InvoiceItem = {
+          id: nextId,
+          retailStore: newStore.trim(),
+          price: price
+        }
+        setItems([...items, newItem])
+        setNewStore('')
+        setNewPrice('')
+      }
+    }
+  }
+
+  const deleteItem = (id: number) => {
+    setItems(items.filter(item => item.id !== id))
+  }
+
+  const clearAllItems = () => {
+    if (window.confirm('Are you sure you want to clear all items? This action cannot be undone.')) {
+      setItems([])
+      clearItemsFromStorage()
+    }
+  }
+
+  const totalSpent = items.reduce((sum, item) => sum + item.price, 0)
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      addItem()
+    }
+  }
+
+  return (
+    <div className="container mx-auto p-6 max-w-2xl">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold">Invoices and Receipts</h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+          Track your purchases and expenses. All data is stored privately in your browser's local storage.
+        </p>
+        {isSaving && (
+          <p className="text-sm text-muted-foreground mt-2">
+            💾 Saving...
+          </p>
+        )}
+      </div>
+      
+      <div className="bg-card rounded-lg border shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50%]">Store/Vendor</TableHead>
+              <TableHead className="w-[30%]">Amount</TableHead>
+              <TableHead className="w-[20%] text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-medium">{item.retailStore}</TableCell>
+                <TableCell>{formatCurrency(item.price)}</TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteItem(item.id)}
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        
+        <div className="p-4 border-t bg-muted/50">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-4">
+              <span className="text-lg font-semibold">Total Amount:</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAllItems}
+                disabled={items.length === 0}
+                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+              >
+                Clear All
+              </Button>
+            </div>
+            <span className="text-lg font-bold">{formatCurrency(totalSpent)}</span>
+          </div>
+          
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter store or vendor name"
+              value={newStore}
+              onChange={(e) => setNewStore(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="flex-1"
+            />
+            <Input
+              placeholder="Enter amount"
+              type="number"
+              step="0.01"
+              min="0"
+              value={newPrice}
+              onChange={(e) => setNewPrice(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="w-32"
+            />
+            <Button onClick={addItem} disabled={!newStore.trim() || !newPrice.trim()}>
+              Add Item
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
