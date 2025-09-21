@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Trash2, Calendar as CalendarIcon, Share, Copy, Check } from 'lucide-react'
+import { Trash2, Calendar as CalendarIcon, Share, Copy, Check, Sun, Moon } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,22 +31,30 @@ const STORAGE_KEY = 'invoices-and-receipts-items'
 const URL_DATA_PARAM = 'data'
 
 // App Icon Component
-const AppIcon = () => (
+const AppIcon = ({ isDark = false }) => (
   <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" 
        className="mx-auto transition-transform duration-300 hover:scale-110 cursor-default drop-shadow-lg">
     {/* Gradient definition */}
     <defs>
       <linearGradient id="violetBlueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="hsl(270 85% 60%)" />
-        <stop offset="100%" stopColor="hsl(240 85% 65%)" />
+        <stop offset="0%" stopColor="hsl(270 85% 60%)" className="light-mode-stop" />
+        <stop offset="100%" stopColor="hsl(240 85% 65%)" className="light-mode-stop" />
+      </linearGradient>
+      <linearGradient id="violetBlueGradientDark" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="hsl(270 85% 70%)" />
+        <stop offset="100%" stopColor="hsl(240 85% 75%)" />
       </linearGradient>
     </defs>
     {/* Document background */}
-    <rect x="12" y="4" width="32" height="44" rx="4" fill="url(#violetBlueGradient)" stroke="hsl(270 85% 55%)" strokeWidth="2"/>
+    <rect x="12" y="4" width="32" height="44" rx="4" 
+          fill={`url(#${isDark ? 'violetBlueGradientDark' : 'violetBlueGradient'})`} 
+          stroke={isDark ? "hsl(270 85% 70%)" : "hsl(270 85% 55%)"} strokeWidth="2"/>
     
     {/* Document fold corner */}
-    <path d="M36 4L44 12V8C44 5.79086 42.2091 4 40 4H36Z" fill="hsl(270 85% 55%)"/>
-    <path d="M36 4V12H44" stroke="hsl(270 85% 55%)" strokeWidth="2" fill="none"/>
+    <path d="M36 4L44 12V8C44 5.79086 42.2091 4 40 4H36Z" 
+          fill={isDark ? "hsl(270 85% 70%)" : "hsl(270 85% 55%)"}/>
+    <path d="M36 4V12H44" 
+          stroke={isDark ? "hsl(270 85% 70%)" : "hsl(270 85% 55%)"} strokeWidth="2" fill="none"/>
     
     {/* Document lines (representing text) */}
     <rect x="18" y="18" width="16" height="2" rx="1" fill="white" opacity="0.8"/>
@@ -202,6 +210,25 @@ export function InvoiceTracker() {
   const [isSaving, setIsSaving] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
   const [shareSuccess, setShareSuccess] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' || 
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    }
+    return false
+  })
+
+  // Apply dark mode theme
+  useEffect(() => {
+    const root = window.document.documentElement
+    if (isDarkMode) {
+      root.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      root.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [isDarkMode])
 
   // Save items to localStorage whenever items change
   useEffect(() => {
@@ -255,6 +282,10 @@ export function InvoiceTracker() {
     if (e.key === 'Enter') {
       addItem()
     }
+  }
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode)
   }
 
   const handleShareLink = async () => {
@@ -311,10 +342,26 @@ export function InvoiceTracker() {
         </div>
       )}
       
+      {/* Theme Toggle Button */}
+      <div className="absolute top-4 right-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          className="rounded-full hover:bg-accent transition-colors"
+        >
+          {isDarkMode ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
+        </Button>
+      </div>
+
       <div className="text-center mb-8">
         {/* App Icon */}
         <div className="mb-4">
-          <AppIcon />
+          <AppIcon isDark={isDarkMode} />
         </div>
         <h1 className="text-3xl font-bold text-gradient-violet-blue">Invoices and Receipts</h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
