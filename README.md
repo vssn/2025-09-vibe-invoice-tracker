@@ -1,69 +1,56 @@
-# React + TypeScript + Vite
+# 📄 Invoices and Receipts Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A privacy-first expense tracking app. All data stays in your browser - no servers, no data collection.
 
-Currently, two official plugins are available:
+![Tech Stack](https://img.shields.io/badge/React%20%7C%20TypeScript%20%7C%20Tailwind%20%7C%20shadcn%2Fui-blue)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Key Features
 
-## Expanding the ESLint configuration
+- **🔒 Complete Privacy**: 100% local storage, works offline, no data transmission
+- **💰 Euro Currency**: Proper European formatting (€42,50) with real-time totals
+- **🎨 Modern UI**: Responsive design with custom icons and smooth animations
+- **⚡ Instant UX**: Auto-save, keyboard shortcuts, input validation, bulk operations
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Built With
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+**Stack**: React 18 + TypeScript + Vite | **UI**: Tailwind CSS + shadcn/ui + Lucide icons | **Storage**: localStorage API
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🚀 Quick Start
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone <repository-url>
+cd 2025-09-vibe-invoice-tracker
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Requirements**: Node.js 18+
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📊 Data Structure
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```typescript
+interface InvoiceItem {
+  id: number
+  retailStore: string  // Store or vendor name
+  price: number       // Amount in euros
+}
 ```
+
+**Storage**: localStorage key `invoices-and-receipts-items` with JSON array format
+
+## 🔧 Customization
+
+**Currency**: Edit `formatCurrency` function for different locales (USD, GBP, etc.)
+**Sample Data**: Modify `loadItemsFromStorage` default entries
+**Styling**: Update Tailwind classes in components
+
+## 🛡️ Privacy
+
+Zero analytics, no external requests, GDPR compliant. All data stays in your browser.
+
+## 📄 License
+
+MIT License
+
+---
+*A privacy-focused financial tracker built with React + TypeScript*
