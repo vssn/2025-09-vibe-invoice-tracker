@@ -1,0 +1,23 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Document background -->
+  <rect x="6" y="2" width="16" height="22" rx="2" fill="#3B82F6" stroke="#1E40AF" stroke-width="1"/>
+  
+  <!-- Document fold corner -->
+  <path d="M18 2L22 6V4C22 2.89543 21.1046 2 20 2H18Z" fill="#1E40AF"/>
+  <path d="M18 2V6H22" stroke="#1E40AF" stroke-width="1" fill="none"/>
+  
+  <!-- Document lines (representing text) -->
+  <rect x="9" y="9" width="8" height="1" rx="0.5" fill="white" opacity="0.7"/>
+  <rect x="9" y="11" width="6" height="1" rx="0.5" fill="white" opacity="0.7"/>
+  <rect x="9" y="13" width="7" height="1" rx="0.5" fill="white" opacity="0.7"/>
+  
+  <!-- Euro symbol circle background -->
+  <circle cx="14" cy="18" r="4.5" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  
+  <!-- Euro symbol -->
+  <path d="M12.5 15.5C12.9 15.2 13.4 15 14 15C14.8 15 15.5 15.4 15.9 16M12.5 20.5C12.9 20.8 13.4 21 14 21C14.8 21 15.5 20.6 15.9 20M11 17H16M11 19H16" 
+        stroke="#D97706" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Shadow -->
+  <ellipse cx="14" cy="26" rx="8" ry="2" fill="#000000" opacity="0.1"/>
+</svg>

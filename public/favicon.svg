@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Document background -->
+  <rect x="12" y="4" width="32" height="44" rx="4" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
+  
+  <!-- Document fold corner -->
+  <path d="M36 4L44 12V8C44 5.79086 42.2091 4 40 4H36Z" fill="#1E40AF"/>
+  <path d="M36 4V12H44" stroke="#1E40AF" stroke-width="2" fill="none"/>
+  
+  <!-- Document lines (representing text) -->
+  <rect x="18" y="18" width="16" height="2" rx="1" fill="white" opacity="0.8"/>
+  <rect x="18" y="22" width="12" height="2" rx="1" fill="white" opacity="0.8"/>
+  <rect x="18" y="26" width="14" height="2" rx="1" fill="white" opacity="0.8"/>
+  <rect x="18" y="30" width="10" height="2" rx="1" fill="white" opacity="0.8"/>
+  
+  <!-- Euro symbol circle background -->
+  <circle cx="28" cy="40" r="9" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2.5"/>
+  
+  <!-- Euro symbol - larger and more detailed -->
+  <path d="M24 34C25.5 33 27 32.5 28.5 32.5C30.5 32.5 32.2 33.5 33.5 35M24 46C25.5 47 27 47.5 28.5 47.5C30.5 47.5 32.2 46.5 33.5 45M21 38H34M21 42H34" 
+        stroke="#D97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Additional detail: small lines for invoice items -->
+  <rect x="18" y="34" width="4" height="1" rx="0.5" fill="white" opacity="0.6"/>
+  <rect x="18" y="36" width="6" height="1" rx="0.5" fill="white" opacity="0.6"/>
+  
+  <!-- Shadow -->
+  <ellipse cx="28" cy="56" rx="16" ry="4" fill="#000000" opacity="0.1"/>
+</svg>

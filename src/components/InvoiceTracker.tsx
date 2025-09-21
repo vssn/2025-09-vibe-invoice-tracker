@@ -19,6 +19,39 @@ interface InvoiceItem {
 
 const STORAGE_KEY = 'invoices-and-receipts-items'
 
+// App Icon Component
+const AppIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" 
+       className="mx-auto transition-transform duration-300 hover:scale-110 cursor-default drop-shadow-lg">
+    {/* Document background */}
+    <rect x="12" y="4" width="32" height="44" rx="4" fill="#3B82F6" stroke="#1E40AF" strokeWidth="2"/>
+    
+    {/* Document fold corner */}
+    <path d="M36 4L44 12V8C44 5.79086 42.2091 4 40 4H36Z" fill="#1E40AF"/>
+    <path d="M36 4V12H44" stroke="#1E40AF" strokeWidth="2" fill="none"/>
+    
+    {/* Document lines (representing text) */}
+    <rect x="18" y="18" width="16" height="2" rx="1" fill="white" opacity="0.8"/>
+    <rect x="18" y="22" width="12" height="2" rx="1" fill="white" opacity="0.8"/>
+    <rect x="18" y="26" width="14" height="2" rx="1" fill="white" opacity="0.8"/>
+    <rect x="18" y="30" width="10" height="2" rx="1" fill="white" opacity="0.8"/>
+    
+    {/* Euro symbol circle background */}
+    <circle cx="28" cy="40" r="9" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2.5"/>
+    
+    {/* Euro symbol - larger and more detailed */}
+    <path d="M24 34C25.5 33 27 32.5 28.5 32.5C30.5 32.5 32.2 33.5 33.5 35M24 46C25.5 47 27 47.5 28.5 47.5C30.5 47.5 32.2 46.5 33.5 45M21 38H34M21 42H34" 
+          stroke="#D97706" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    
+    {/* Additional detail: small lines for invoice items */}
+    <rect x="18" y="34" width="4" height="1" rx="0.5" fill="white" opacity="0.6"/>
+    <rect x="18" y="36" width="6" height="1" rx="0.5" fill="white" opacity="0.6"/>
+    
+    {/* Shadow */}
+    <ellipse cx="28" cy="56" rx="16" ry="4" fill="#000000" opacity="0.1"/>
+  </svg>
+)
+
 // Currency formatting utility
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('de-DE', {
@@ -126,6 +159,10 @@ export function InvoiceTracker() {
   return (
     <div className="container mx-auto p-6 max-w-2xl">
       <div className="text-center mb-8">
+        {/* App Icon */}
+        <div className="mb-4">
+          <AppIcon />
+        </div>
         <h1 className="text-3xl font-bold">Invoices and Receipts</h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
           Track your purchases and expenses. All data is stored privately in your browser's local storage.
