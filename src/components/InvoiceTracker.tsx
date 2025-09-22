@@ -28,7 +28,7 @@ interface InvoiceItem {
 }
 
 const STORAGE_KEY = 'invoices-and-receipts-items'
-const URL_DATA_PARAM = 'data'
+const URL_DATA_PARAM = 'd' // Shorter parameter name
 
 // App Icon Component
 const AppIcon = ({ isDark = false }) => (
@@ -116,6 +116,46 @@ const clearItemsFromStorage = () => {
   }
 }
 
+// Compress and decompress data for shorter URLs
+const compressData = (items: InvoiceItem[]): string => {
+  // Create a more compact representation
+  const compact = items.map(item => ([
+    item.id,
+    item.retailStore,
+    item.price,
+    item.description,
+    item.date
+  ]))
+  return JSON.stringify(compact)
+}
+
+const decompressData = (compactStr: string): InvoiceItem[] => {
+  const compact = JSON.parse(compactStr)
+  return compact.map((item: any[]) => ({
+    id: item[0] || 1,
+    retailStore: item[1] || 'Unknown Store',
+    price: Number(item[2]) || 0,
+    description: item[3] || 'No description',
+    date: item[4] || new Date().toISOString()
+  }))
+}
+
+// URL-safe base64 encoding/decoding
+const urlSafeBase64Encode = (str: string): string => {
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '')
+}
+
+const urlSafeBase64Decode = (str: string): string => {
+  // Add padding back
+  str += '==='.slice(0, (4 - str.length % 4) % 4)
+  // Replace URL-safe characters
+  str = str.replace(/-/g, '+').replace(/_/g, '/')
+  return atob(str)
+}
+
 // Load data from URL parameter if present
 const loadItemsFromUrlParam = (): InvoiceItem[] | null => {
   try {
@@ -123,19 +163,13 @@ const loadItemsFromUrlParam = (): InvoiceItem[] | null => {
     const encodedData = urlParams.get(URL_DATA_PARAM)
     
     if (encodedData) {
-      // Decode base64 data
-      const decodedData = atob(encodedData)
-      const parsedItems = JSON.parse(decodedData)
+      // Decode URL-safe base64 data and decompress
+      const decodedData = urlSafeBase64Decode(encodedData)
+      const parsedItems = decompressData(decodedData)
       
       // Validate the data structure
       if (Array.isArray(parsedItems)) {
-        return parsedItems.map((item: any) => ({
-          id: item.id || 1,
-          retailStore: item.retailStore || 'Unknown Store',
-          price: Number(item.price) || 0,
-          description: item.description || 'No description',
-          date: item.date || new Date().toISOString()
-        }))
+        return parsedItems
       }
     }
   } catch (error) {
@@ -184,13 +218,16 @@ const loadItemsFromStorage = (): InvoiceItem[] => {
   ]
 }
 
-// Generate a shareable link with invoice data encoded as base64
+// Generate a shareable link with compressed and URL-safe encoded data
 const generateShareLink = (items: InvoiceItem[]): string => {
   try {
-    const jsonData = JSON.stringify(items)
-    const encodedData = btoa(jsonData)
+    // Compress data and encode with URL-safe base64
+    const compactData = compressData(items)
+    const encodedData = urlSafeBase64Encode(compactData)
     const baseUrl = window.location.origin + window.location.pathname
-    return `${baseUrl}?${URL_DATA_PARAM}=${encodedData}`
+    
+    // Add fragment identifier for better URL recognition by tools
+    return `${baseUrl}?${URL_DATA_PARAM}=${encodedData}#shared-invoices`
   } catch (error) {
     console.error('Failed to generate share link:', error)
     throw error
