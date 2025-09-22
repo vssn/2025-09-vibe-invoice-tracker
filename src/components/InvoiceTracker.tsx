@@ -18,6 +18,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 
 interface InvoiceItem {
   id: number
@@ -254,6 +263,7 @@ export function InvoiceTracker() {
     }
     return false
   })
+  const [showClearDialog, setShowClearDialog] = useState(false)
 
   // Apply dark mode theme
   useEffect(() => {
@@ -306,11 +316,18 @@ export function InvoiceTracker() {
     setItems(items.filter(item => item.id !== id))
   }
 
-  const clearAllItems = () => {
-    if (window.confirm('Are you sure you want to clear all items? This action cannot be undone.')) {
-      setItems([])
-      clearItemsFromStorage()
-    }
+  const openClearDialog = () => {
+    setShowClearDialog(true)
+  }
+
+  const confirmClearAll = () => {
+    setItems([])
+    clearItemsFromStorage()
+    setShowClearDialog(false)
+  }
+
+  const cancelClearAll = () => {
+    setShowClearDialog(false)
   }
 
   const totalSpent = items.reduce((sum, item) => sum + item.price, 0)
@@ -437,7 +454,7 @@ export function InvoiceTracker() {
             <Button
               variant="outline"
               size="sm"
-              onClick={clearAllItems}
+              onClick={openClearDialog}
               disabled={items.length === 0}
               className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
               aria-label={`Clear all ${items.length} invoice${items.length !== 1 ? 's' : ''} from the list`}
@@ -568,6 +585,35 @@ export function InvoiceTracker() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Clear All Confirmation Dialog */}
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Clear All Invoices</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete all {items.length} invoice{items.length !== 1 ? 's' : ''}? 
+              This action cannot be undone and will permanently remove all your data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={cancelClearAll}
+              className="flex-1 sm:flex-initial"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmClearAll}
+              className="flex-1 sm:flex-initial"
+            >
+              Clear All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
