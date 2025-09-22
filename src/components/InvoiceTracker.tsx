@@ -349,11 +349,13 @@ export function InvoiceTracker() {
           size="icon"
           onClick={toggleTheme}
           className="rounded-full hover:bg-accent transition-colors"
+          aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {isDarkMode ? (
-            <Sun className="h-5 w-5" />
+            <Sun className="h-5 w-5" aria-hidden="true" />
           ) : (
-            <Moon className="h-5 w-5" />
+            <Moon className="h-5 w-5" aria-hidden="true" />
           )}
         </Button>
       </div>
@@ -384,13 +386,15 @@ export function InvoiceTracker() {
               className={`flex items-center gap-1 transition-all duration-300 ${
                 shareSuccess ? 'gradient-violet-blue text-white border-0 hover:opacity-90' : 'hover:border-primary'
               }`}
+              aria-label={shareSuccess ? "Share link copied to clipboard" : isSharing ? "Generating share link..." : `Create share link for ${items.length} invoice${items.length !== 1 ? 's' : ''}`}
+              title={shareSuccess ? "Link copied!" : "Generate and copy share link"}
             >
               {shareSuccess ? (
-                <><Check className="h-3 w-3" /> Copied!</>
+                <><Check className="h-3 w-3" aria-hidden="true" /> Copied!</>
               ) : isSharing ? (
-                <><Copy className="h-3 w-3 animate-pulse" /> Copying...</>
+                <><Copy className="h-3 w-3 animate-pulse" aria-hidden="true" /> Copying...</>
               ) : (
-                <><Share className="h-3 w-3" /> Share Link</>
+                <><Share className="h-3 w-3" aria-hidden="true" /> Share Link</>
               )}
             </Button>
             <Button
@@ -399,6 +403,8 @@ export function InvoiceTracker() {
               onClick={clearAllItems}
               disabled={items.length === 0}
               className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+              aria-label={`Clear all ${items.length} invoice${items.length !== 1 ? 's' : ''} from the list`}
+              title="Delete all invoices (this action cannot be undone)"
             >
               Clear All
             </Button>
@@ -418,6 +424,8 @@ export function InvoiceTracker() {
               onChange={(e) => setNewStore(e.target.value)}
               onKeyPress={handleKeyPress}
               className="flex-1"
+              aria-label="Store or vendor name"
+              aria-required="true"
             />
             <Input
               placeholder="Enter amount"
@@ -428,6 +436,8 @@ export function InvoiceTracker() {
               onChange={(e) => setNewPrice(e.target.value)}
               onKeyPress={handleKeyPress}
               className="w-32"
+              aria-label="Amount in euros"
+              aria-required="true"
             />
           </div>
           
@@ -438,6 +448,8 @@ export function InvoiceTracker() {
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               className="min-h-[60px] resize-none"
+              aria-label="Item description"
+              aria-required="true"
             />
           </div>
           
@@ -445,31 +457,37 @@ export function InvoiceTracker() {
           <div className="flex gap-2 items-end">
             <div className="flex-1">
               <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={`w-full justify-start text-left font-normal ${
-                      !newDate && "text-muted-foreground"
-                    }`}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {newDate ? format(newDate, "dd. MMM yyyy") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={newDate}
-                    onSelect={setNewDate}
-                    initialFocus
-                  />
-                </PopoverContent>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`w-full justify-start text-left font-normal ${
+                        !newDate && "text-muted-foreground"
+                      }`}
+                      aria-label={newDate ? `Selected date: ${format(newDate, "dd MMMM yyyy")}. Click to change date` : "Click to select a date"}
+                      aria-haspopup="dialog"
+                      aria-expanded="false"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+                      {newDate ? format(newDate, "dd. MMM yyyy") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start" role="dialog" aria-label="Date picker">
+                    <Calendar
+                      mode="single"
+                      selected={newDate}
+                      onSelect={setNewDate}
+                      initialFocus
+                      aria-label="Select a date for the invoice"
+                    />
+                  </PopoverContent>
               </Popover>
             </div>
             <Button 
               onClick={addItem} 
               disabled={!newStore.trim() || !newPrice.trim() || !newDescription.trim() || !newDate}
               className="px-8 gradient-violet-blue hover:opacity-90 transition-opacity"
+              aria-label="Add new invoice item"
+              title="Add the invoice item to your list"
             >
               Add Item
             </Button>
@@ -479,14 +497,14 @@ export function InvoiceTracker() {
       
       {/* Items Table Card */}
       <div className="bg-card rounded-lg border shadow-sm">
-        <Table>
+        <Table role="table" aria-label="Invoice and receipt items">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[20%]">Store/Vendor</TableHead>
-              <TableHead className="w-[30%]">Description</TableHead>
-              <TableHead className="w-[15%]">Date</TableHead>
-              <TableHead className="w-[15%]">Amount</TableHead>
-              <TableHead className="w-[20%] text-right">Actions</TableHead>
+              <TableHead className="w-[20%]" scope="col">Store/Vendor</TableHead>
+              <TableHead className="w-[30%]" scope="col">Description</TableHead>
+              <TableHead className="w-[15%]" scope="col">Date</TableHead>
+              <TableHead className="w-[15%]" scope="col">Amount</TableHead>
+              <TableHead className="w-[20%] text-right" scope="col">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -502,8 +520,10 @@ export function InvoiceTracker() {
                     size="icon"
                     onClick={() => deleteItem(item.id)}
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    aria-label={`Delete invoice from ${item.retailStore} for ${formatCurrency(item.price)}`}
+                    title={`Delete this invoice`}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </TableCell>
               </TableRow>
