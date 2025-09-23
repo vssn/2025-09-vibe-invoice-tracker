@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Calendar as CalendarIcon } from 'lucide-react'
+import { Calendar as CalendarIcon, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +17,7 @@ interface AddItemFormProps {
 }
 
 export function AddItemForm({ onAddItem }: AddItemFormProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
   const [newStore, setNewStore] = useState('')
   const [newPrice, setNewPrice] = useState('')
   const [newDescription, setNewDescription] = useState('')
@@ -38,6 +39,9 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         setNewPrice('')
         setNewDescription('')
         setNewDate(new Date())
+        
+        // Collapse the form after adding item
+        setIsExpanded(false)
       }
     }
   }
@@ -49,9 +53,31 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   }
 
   return (
-    <div className="bg-card rounded-lg border shadow-sm p-4 mb-6">
-      <h2 className="text-lg font-semibold mb-4">Add New Item</h2>
-      <div className="space-y-3">
+    <div className="bg-card rounded-lg border shadow-sm mb-6 overflow-hidden transition-all duration-200">
+      {/* Collapsible Header */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-4 text-left hover:bg-accent/50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        aria-expanded={isExpanded}
+        aria-controls="add-item-form"
+        type="button"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Plus className="h-5 w-5 text-primary" aria-hidden="true" />
+            <h2 className="text-lg font-semibold">Add New Item</h2>
+          </div>
+          {isExpanded ? (
+            <ChevronUp className="h-5 w-5 text-muted-foreground transition-transform" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform" aria-hidden="true" />
+          )}
+        </div>
+      </button>
+      
+      {/* Collapsible Form Content */}
+      {isExpanded && (
+        <div id="add-item-form" className="mt-6 px-4 pb-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
         {/* First row: Store and Amount */}
         <div className="flex gap-2">
           <Input
@@ -128,7 +154,8 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             Add Item
           </Button>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   )
 }
