@@ -39,9 +39,6 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         setNewPrice('')
         setNewDescription('')
         setNewDate(new Date())
-        
-        // Collapse the form after adding item
-        setIsExpanded(false)
       }
     }
   }
