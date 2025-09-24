@@ -1,13 +1,15 @@
+import * as React from "react";
+
 export function SharingInfo() {
   return (
-    <div className="bg-card rounded-lg border shadow-sm p-6 mb-6">
-      <div className="flex items-center gap-4">
+    <div className="bg-card rounded-lg border shadow-lg p-8 mb-6">
+      <div className="flex items-center gap-6">
         <div className="flex-shrink-0">
-          <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-violet-50 to-blue-50 dark:from-violet-100/20 dark:to-blue-100/20 p-2 flex items-center justify-center">
+          <div className="w-28 h-28 rounded-xl bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-200/30 dark:to-blue-200/30 p-3 flex items-center justify-center shadow-lg">
             <img 
               src="/sharing.svg" 
               alt="Sharing feature illustration" 
-              className="w-full h-full object-contain"
+              className="w-24 h-24 object-contain drop-shadow-md"
             />
           </div>
         </div>
