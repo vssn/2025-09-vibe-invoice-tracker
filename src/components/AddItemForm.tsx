@@ -50,11 +50,11 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   }
 
   return (
-    <div className="bg-card rounded-lg border shadow-sm mb-6 overflow-hidden transition-all duration-200">
+    <div className="p-1 bg-card rounded-lg border shadow-sm mb-6 overflow-hidden transition-all duration-200">
       {/* Collapsible Header */}
-      <button
+        <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 text-left hover:bg-accent/50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        className="w-full p-4 text-left rounded-lg hover:bg-accent/50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
         aria-expanded={isExpanded}
         aria-controls="add-item-form"
         type="button"
