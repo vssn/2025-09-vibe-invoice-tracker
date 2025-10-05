@@ -50,7 +50,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
   }
 
   return (
-    <div className="p-1 bg-card rounded-lg border shadow-sm mb-6 overflow-hidden transition-all duration-200">
+    <div className="p-1 bg-card/70 rounded-lg border shadow-sm mb-6 overflow-hidden transition-all duration-200">
       {/* Collapsible Header */}
         <button
         onClick={() => setIsExpanded(!isExpanded)}

@@ -27,7 +27,10 @@
     --input: 260 30% 90%;
     --ring: 260 85% 60%;
     --radius: 0.5rem;
-  }
+    --aurora1: #8adeff;
+    --aurora2: #a4ffeb;
+    --aurora3: #ffdeff;
+  } 
 
   .dark {
     /* Dark violet-blue background */
@@ -52,6 +55,9 @@
     --border: 260 15% 20%;
     --input: 260 15% 20%;
     --ring: 270 85% 70%;
+    --aurora1: #1f1b49;
+    --aurora2: #2a1b4d;
+    --aurora3: #254452;
   }
 }
 
@@ -119,4 +125,10 @@
   .dark .rdp button:hover svg[class*="lucide"] {
     color: hsl(270 85% 75%) !important;
   }
+}
+
+.aurora-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }

@@ -18,7 +18,7 @@ interface InvoiceTableProps {
 
 export function InvoiceTable({ items, onDeleteItem }: InvoiceTableProps) {
   return (
-    <div className="bg-card rounded-lg border shadow-sm mb-6">
+    <div className="bg-card/80 rounded-lg border shadow-sm mb-6">
       <Table role="table" aria-label="Invoice and receipt items">
         <TableHeader>
           <TableRow>
