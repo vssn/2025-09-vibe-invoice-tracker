@@ -19,6 +19,8 @@ A privacy-first expense tracking app. All data stays in your browser - no server
 
 ## 🚀 Quick Start
 
+### Local Development
+
 ```bash
 git clone <repository-url>
 cd 2025-09-vibe-invoice-tracker
@@ -27,6 +29,28 @@ npm run dev
 ```
 
 **Requirements**: Node.js 18+
+
+### Docker Deployment
+
+Build and run the app in a minimal Alpine-based container:
+
+```bash
+# Build the image
+docker build -t vibe-invoice-tracker .
+
+# Run the container
+docker run -d -p 9000:80 --name vibe-invoice vibe-invoice-tracker
+```
+
+**Access**: http://localhost:9000
+
+**Image size**: ~50-70MB (multi-stage build with Node builder + Nginx Alpine runtime)
+
+**Stop the container**:
+```bash
+docker stop vibe-invoice
+docker rm vibe-invoice
+```
 
 ## 📊 Data Structure
 
