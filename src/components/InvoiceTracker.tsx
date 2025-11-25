@@ -11,7 +11,7 @@ import { loadItemsFromStorage, saveItemsToStorage, clearItemsFromStorage } from 
 
 
 
-export function InvoiceTracker() {
+export function InvoiceTracker({ onThemeChange }: { onThemeChange?: (dark: boolean) => void }) {
   const [items, setItems] = useState<InvoiceItem[]>(() => {
     // Load items from localStorage on initial render
     return loadItemsFromStorage()
@@ -36,7 +36,8 @@ export function InvoiceTracker() {
       root.classList.remove('dark')
       localStorage.setItem('theme', 'light')
     }
-  }, [isDarkMode])
+    if (onThemeChange) onThemeChange(isDarkMode)
+  }, [isDarkMode, onThemeChange])
 
   // Save items to localStorage whenever items change
   useEffect(() => {
@@ -111,8 +112,8 @@ export function InvoiceTracker() {
         <div className="mb-4">
           <AppIcon isDark={isDarkMode} />
         </div>
-        <h1 className="text-3xl font-bold text-gradient-violet-blue">Invoices and Receipts</h1>
-        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+        <h1 className="text-3xl font-bold">Invoices and Receipts</h1>
+        <p className="text-sm mt-2 max-w-md mx-auto">
           Track your purchases and expenses. All data is stored privately in your browser's local storage.
         </p>
       </div>

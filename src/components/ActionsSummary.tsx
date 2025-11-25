@@ -73,7 +73,7 @@ export function ActionsSummary({ items, totalSpent, onClearAll }: ActionsSummary
 
   return (
     <>
-      <div className="bg-card rounded-lg border shadow-sm p-4 mb-6">
+      <div className="bg-card/60 rounded-lg border shadow-sm p-4 mb-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <span className="text-lg font-semibold">Total Amount: {formatCurrency(totalSpent)}</span>
